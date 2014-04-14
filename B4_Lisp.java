@@ -4,7 +4,9 @@ public class B4_Lisp {
 	public static void main(String[] args) {
 
 //		String lisp = "(+ 10 20)";
-		String lisp = "(+ (* 10 20)(- y 4))";
+//		String lisp = "(+ (* x 2)(- y 4) z)";
+		String lisp = "(+ (* 2 3)(- 5 4) 3)";
+//		String lisp = "(defun func (x y)( + x y))";
 
 		// 字句解析
 		LexAnalysis token_Lex = new LexAnalysis(lisp);
@@ -23,7 +25,10 @@ public class B4_Lisp {
 		ConsCell syntact = token_Syn.returnCC();
 		ConsCell.printConsCell(syntact);
 
-		System.out.println("");
+		// 評価
+		Evaluation result = new Evaluation( syntact );
+		System.out.println(result.returnResult( syntact ));
+
 	}
 
 }

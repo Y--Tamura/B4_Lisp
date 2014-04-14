@@ -81,6 +81,7 @@ public class ConsCell {
 
 		if( cc.car != null ) {
 			if( printcounter != 0 ) System.out.print( "( to " + printcounter + ") " );
+			if( cc.cdr != null ) System.out.print("-- ");
 			temp_counter = printcounter;
 			printcounter++;
 			if( cc.cdr != null ) printConsCell( cc.cdr );
