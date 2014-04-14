@@ -14,18 +14,25 @@ public class ConsCell {
 
 	public ConsCell( String[] str , int counter , String[] functions , String[]valiables){
 		// nullか")"なら終了
-		if( str[counter] == null || ")".equals(str[counter]) );
+		if( str[counter] == null || ")".equals(str[counter]) ) ;
 
 		// "("なら新たな分岐を作成
 		else if( "(".equals( str[counter] ) ){
 			this.type = 3;
-			counter++;
-			car = new ConsCell( str , counter , functions , valiables );
-			while( !(")".equals( str[counter] ) ) ){
-				counter++;
-			}
+			car = new ConsCell( str , counter + 1 , functions , valiables );
 
-			cdr = new ConsCell( str , counter + 1 , functions , valiables );
+			int bracket_counter = 0;
+
+			do{
+				if( "(".equals( str[counter] ) ) bracket_counter++ ;
+				else if( ")".equals( str[counter] ) ) bracket_counter-- ;
+				counter++;
+			} while( bracket_counter != 0 );
+
+			if( counter < str.length ){
+				if( ")".equals(str[counter]) && str.length < counter + 1 ) counter++;
+				cdr = new ConsCell( str , counter , functions , valiables );
+			}
 
 		// それ以外なら要素を格納
 		} else {
