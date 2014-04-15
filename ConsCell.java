@@ -1,4 +1,6 @@
-//	type	0:未指定 1:数値 2:演算子 3:カッコ
+import java.util.ArrayList;
+
+//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil
 //	car		枝分かれ
 //	value	値
 //	cdr		次
@@ -12,7 +14,7 @@ public class ConsCell {
 	private static int printcounter = 0;
 
 
-	public ConsCell( String[] str , int counter , String[] functions , String[]valiables){
+	public ConsCell( String[] str , int counter , ArrayList<DefinitionCell> functions , ArrayList<DefinitionCell>valiables ){
 		// nullか")"なら終了
 		if( str[counter] == null || ")".equals(str[counter]) ) ;
 
@@ -39,18 +41,25 @@ public class ConsCell {
 			this.value = str[ counter ];
 
 			// 関数名か否かの判定
-			int scanningcounter = 0;
-			while( functions != null && functions[scanningcounter]!= null && functions.length != 0 ){
-				if( functions[scanningcounter].equals( this.value ) ) type = 2;
-				scanningcounter++;
+			if( !functions.isEmpty() ){
+				if( functions.indexOf( new DefinitionCell( this.value ) ) != -1 ) this.type = 2;
+			}
+
+			// もとから実装している関数
+			if( this.type == 0 && this.value.matches("(defun)|(if)|(setq)") ){
+				this.type = 2;
 			}
 
 			// 変数名か否かの判定
-			scanningcounter = 0;
-			while( valiables != null && valiables[scanningcounter] != null && valiables.length != 0 ){
-				if( valiables[scanningcounter].equals( this.value ) ) type = 1;
-				scanningcounter++;
+			if( !valiables.isEmpty() ){
+				if( valiables.indexOf( new DefinitionCell( this.value ) ) != -1 ) this.type = 1;
 			}
+
+			// 演算子か否かの判定
+			if( this.type == 0 && (this.value.matches("<|<=|>|>=|=") || this.value.matches("[+-/*]") ) ){
+				this.type = 2;
+			}
+
 
 			// 数値か否かの判定
 			if( this.type == 0 ){
@@ -58,7 +67,7 @@ public class ConsCell {
 					Double.parseDouble( str[counter] );
 					this.type = 1;
 				} catch(NumberFormatException e){
-					this.type = 2;
+					this.type = 0;
 				}
 			}
 
@@ -81,17 +90,18 @@ public class ConsCell {
 
 		if( cc.car != null ) {
 			if( printcounter != 0 ) System.out.print( "( to " + printcounter + ") " );
-			if( cc.cdr != null ) System.out.print("-- ");
+			if( cc.cdr != null && cc.cdr.value != null ) System.out.print("-- ");
+			else System.out.println("");
 			temp_counter = printcounter;
 			printcounter++;
 			if( cc.cdr != null ) printConsCell( cc.cdr );
 			if( temp_counter != 0 ) System.out.print("\n(" + temp_counter + ")-- ");
-			printConsCell(cc.car);
+			printConsCell( cc.car );
 		} else if( cc.value != null  && cc.type != 3 ){
-			System.out.print(cc.value);
+			System.out.print( cc.value );
 			if( cc.cdr != null ) {
 				System.out.print(" -- ");
-				printConsCell(cc.cdr);
+				printConsCell( cc.cdr );
 			} else System.out.println("");
 		}
 

@@ -1,11 +1,13 @@
+import java.util.ArrayList;
+
 
 public class SynAnalysis {
 
 	private String[] tokens;
-	private String[] functions;
-	private String[] valiables;
+	private ArrayList<DefinitionCell> functions;
+	private ArrayList<DefinitionCell> valiables;
 
-	public SynAnalysis( String[] str , String[] functions , String[] valiables) {
+	public SynAnalysis( String[] str , ArrayList<DefinitionCell> functions , ArrayList<DefinitionCell> valiables) {
 		this.tokens = str;
 		this.functions = functions;
 		this.valiables = valiables;
