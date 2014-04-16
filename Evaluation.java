@@ -6,16 +6,19 @@ public class Evaluation {
 
 	public String value = null;
 	public ConsCell token_CC;
-	public ArrayList<DefinitionCell> functions, valiables;
+	public ArrayList<String> functions, valiables, valiablevalues;
+	public ArrayList<ConsCell> functionvalues;
 
 	public Evaluation(ConsCell tokens) {
-		this( tokens, null , null );
+		this( tokens, null , null , null , null );
 	}
 
-	public Evaluation(ConsCell tokens, ArrayList<DefinitionCell> functions , ArrayList<DefinitionCell>valiables ) {
+	public Evaluation(ConsCell tokens, ArrayList<String> functions , ArrayList<String> valiables , ArrayList<ConsCell> functionvalues , ArrayList<String> valiablevalues ) {
 		token_CC = tokens;
 		this.functions = functions;
 		this.valiables = valiables;
+		this.functionvalues = functionvalues;
+		this.valiablevalues = valiablevalues;
 	}
 
 	public String returnResult( ConsCell tokens ){
@@ -33,17 +36,23 @@ public class Evaluation {
 			// 終端へ移動
 			do{
 				if( temp.type == 2 ) operateCell = temp;
+				else if ( temp.type == 5 ){
+					operateCell = temp;
+					break;
+				}
+
 				if( temp.car != null ){
 					checkCell = temp;
 					temp = temp.car;
 				} else if( temp.cdr != null ){
 					temp = temp.cdr;
 				}
+
 			} while ( temp.car != null || temp.cdr != null );
 
 			if( operateCell == null ) {
 				System.out.println("演算子がありません");
-				System.exit(1);
+				return "error";
 			}
 
 			if( operateCell.value.matches("[+-/*]") ){
@@ -58,13 +67,35 @@ public class Evaluation {
 				checkCell.type = 4;
 			}else if( operateCell.value.matches("setq") ){
 				// 変数定義
-				checkCell.value = operateCell.cdr.cdr.value;
-				this.valiables.add( new DefinitionCell(operateCell.cdr.value , operateCell.cdr.cdr) );
+				if( operateCell.cdr.cdr != null ){
+					checkCell.value = operateCell.cdr.cdr.value;
+					this.valiables.add( operateCell.cdr.value );
+					this.valiablevalues.add( operateCell.cdr.cdr.value );
+				} else {
+					checkCell.value = null;
+					this.valiables.add( operateCell.cdr.value );
+					this.valiablevalues.add( null );
+				}
 				checkCell.car = null;
 				checkCell.type = 1;
 			}else if( operateCell.value.matches("defun") ){
 				// 関数定義
-				this.functions.add( new DefinitionCell(operateCell.cdr.value , operateCell.cdr.cdr.cdr) );
+				this.functions.add( operateCell.cdr.value );
+				this.functionvalues.add( operateCell.cdr.cdr );
+
+				// 引数処理
+				if( operateCell.cdr.cdr.type != 3 ){
+					this.valiables.add( operateCell.cdr.cdr.value );
+					this.valiablevalues.add( null );
+				} else {
+					ConsCell valiableCell = operateCell.cdr.cdr.car;
+					while( valiableCell != null ){
+						this.valiables.add( valiableCell.value );
+						this.valiablevalues.add( null );
+						valiableCell = valiableCell.cdr;
+					}
+				}
+
 				checkCell.car = null;
 				checkCell.type = 1;
 			}else if( operateCell.value.matches("if") ){
@@ -80,11 +111,28 @@ public class Evaluation {
 					checkCell.type = 0;
 				} else{
 					System.out.println("if文の記法が間違っているか、予期しないエラー。");
-					System.exit(1);
+					return "error";
 				}
+			}else if( functions.lastIndexOf(operateCell.value) != -1 ){
+				// 定義された関数
+
+				if( operateCell.cdr.type != 3 ){
+					valiablevalues.set( valiables.lastIndexOf( functionvalues.get( this.functions.lastIndexOf( operateCell.value ) ).value ) , operateCell.cdr.value );
+				} else {
+					ConsCell valiableCell = functionvalues.get( this.functions.lastIndexOf( operateCell.value ) ).car;
+					ConsCell o_valiableCell = operateCell.cdr.car;
+					while( valiableCell != null ){
+						valiablevalues.set( valiables.lastIndexOf( valiableCell.value ) , o_valiableCell.value );
+						valiableCell = valiableCell.cdr;
+						o_valiableCell = o_valiableCell.cdr;
+					}
+				}
+
+				operateCell = functionvalues.get( functions.lastIndexOf( operateCell.value ) ).cdr ;
+
 			}else{
 				System.out.println("記法が間違っているか、予期しないエラー。(failure_in_operater-analysis.)");
-				System.exit(1);
+				return "error";
 			}
 
 		}while( tokens.cdr != null || tokens.car != null );
@@ -106,7 +154,7 @@ public class Evaluation {
 
 		if( values.empty() ){
 			System.out.println("記法が間違っているか、予期しないエラー。(stack_empty)");
-			System.exit(1);
+			return "error";
 		}
 
 		double num = 0.0 ;
@@ -125,7 +173,7 @@ public class Evaluation {
 		} else if( operater.equals("-") ){
 			if( size != 2 ){
 				System.out.println("減算は２項演算です");
-				System.exit(1);
+				return "error";
 			} else {
 				double n = values.pop();
 				double m = values.pop();
@@ -134,7 +182,7 @@ public class Evaluation {
 		} else if( operater.equals("/") ){
 			if( size != 2 ){
 				System.out.println("除算は２項演算です");
-				System.exit(1);
+				return "error";
 			} else {
 				double n = values.pop();
 				double m = values.pop();
@@ -142,7 +190,7 @@ public class Evaluation {
 			}
 		} else {
 				System.out.println("記法が間違っているか、予期しないエラー。");
-				System.exit(1);
+				return "error";
 		}
 
 	return String.valueOf(num);
@@ -166,7 +214,7 @@ public class Evaluation {
 
 		if( values.empty() || size != 2 ){
 			System.out.println("比較は２項演算です。");
-			System.exit(1);
+			return "error";
 		}
 
 		double n = values.pop();
@@ -189,7 +237,7 @@ public class Evaluation {
 			else value = "nil";
 		} else {
 			System.out.println("比較の記述が不正");
-			System.exit(1);
+			return "error";
 		}
 
 		return value;

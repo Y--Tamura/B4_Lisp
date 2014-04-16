@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil
+//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil 5:関数定義
 //	car		枝分かれ
 //	value	値
 //	cdr		次
@@ -13,15 +13,19 @@ public class ConsCell {
 	public String value = null;
 	private static int printcounter = 0;
 
+	public ConsCell( String str ){
+		this.value = str;
+	}
 
-	public ConsCell( String[] str , int counter , ArrayList<DefinitionCell> functions , ArrayList<DefinitionCell>valiables ){
+
+	public ConsCell( String[] str , int counter , ArrayList<String> functions , ArrayList<String>valiables , ArrayList<ConsCell> functionvalues , ArrayList<String> valiablevalues ){
 		// nullか")"なら終了
 		if( str[counter] == null || ")".equals(str[counter]) ) ;
 
 		// "("なら新たな分岐を作成
 		else if( "(".equals( str[counter] ) ){
 			this.type = 3;
-			car = new ConsCell( str , counter + 1 , functions , valiables );
+			car = new ConsCell( str , counter + 1 , functions , valiables , functionvalues , valiablevalues );
 
 			int bracket_counter = 0;
 
@@ -33,7 +37,7 @@ public class ConsCell {
 
 			if( counter < str.length ){
 				if( ")".equals(str[counter]) && str.length < counter + 1 ) counter++;
-				cdr = new ConsCell( str , counter , functions , valiables );
+				cdr = new ConsCell( str , counter , functions , valiables , functionvalues , valiablevalues );
 			}
 
 		// それ以外なら要素を格納
@@ -42,17 +46,19 @@ public class ConsCell {
 
 			// 関数名か否かの判定
 			if( !functions.isEmpty() ){
-				if( functions.indexOf( new DefinitionCell( this.value ) ) != -1 ) this.type = 2;
+				if( functions.indexOf( this.value ) != -1 ) this.type = 2;
 			}
 
 			// もとから実装している関数
-			if( this.type == 0 && this.value.matches("(defun)|(if)|(setq)") ){
+			if( this.type == 0 && this.value.matches("(if)|(setq)") ){
 				this.type = 2;
+			}else if( this.type == 0 && this.value.matches("defun") ){
+				this.type = 5;
 			}
 
 			// 変数名か否かの判定
 			if( !valiables.isEmpty() ){
-				if( valiables.indexOf( new DefinitionCell( this.value ) ) != -1 ) this.type = 1;
+				if( valiables.indexOf( this.value ) != -1 ) this.type = 1;
 			}
 
 			// 演算子か否かの判定
@@ -74,7 +80,7 @@ public class ConsCell {
 			// 次のセルの作成
 			counter++;
 			if( !")".equals( str[ counter ]) ){
-				this.cdr = new ConsCell( str , counter , functions , valiables );
+				this.cdr = new ConsCell( str , counter , functions , valiables , functionvalues , valiablevalues );
 			}
 		}
 
@@ -82,7 +88,7 @@ public class ConsCell {
 
 
 	public ConsCell( String[] str ){
-		this( str, 0 , null , null );
+		this( str, 0 , null , null , null , null );
 	}
 
 	public static void printConsCell( ConsCell cc ){
@@ -90,7 +96,7 @@ public class ConsCell {
 
 		if( cc.car != null ) {
 			if( printcounter != 0 ) System.out.print( "( to " + printcounter + ") " );
-			if( cc.cdr != null && cc.cdr.value != null ) System.out.print("-- ");
+			if( cc.cdr != null && cc.cdr.type != 0 ) System.out.print("-- ");
 			else System.out.println("");
 			temp_counter = printcounter;
 			printcounter++;

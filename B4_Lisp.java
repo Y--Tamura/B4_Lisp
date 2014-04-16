@@ -1,39 +1,80 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class B4_Lisp {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 //		String lisp = "(+ 10 20)";
 //		String lisp = "(+ (* x 2)(- y 4) z)";
 //		String lisp = "(+ (* 2 3)(- 5 4) 3)";
 //		String lisp = "(defun func (x y)( + x y))";
 //		String lisp = "(if (= (+ 3 3) 6) 1.0 2.0)";
-		String lisp = "(setq abc 100)";
+//		String lisp = "(setq abc 100)";
+//		String lisp = "(defun function (a b) (+ a b))";
 
-		// 字句解析
-		LexAnalysis token_Lex = new LexAnalysis(lisp);
-		String[] tokens_str = token_Lex.returnStr();
+		String lisp;
+		int argcounter = 0;
 
-//		字句解析結果確認用
-//		for(int i = 0; i <tokens_str.length ; i++ ){
+		ArrayList<String> functions = new ArrayList<String>();
+		ArrayList<ConsCell> functionvalues = new ArrayList<ConsCell>();
+		ArrayList<String> valiables = new ArrayList<String>();
+		ArrayList<String> valiablevalues = new ArrayList<String>();
+
+		do{
+
+			if( args.length == 0 ){
+				System.out.print(" Input:");
+				BufferedReader input = new BufferedReader( (new InputStreamReader( System.in )) );
+				lisp = input.readLine();
+			} else {
+				if( argcounter >= args.length ) lisp = null;
+				lisp = args[ argcounter ];
+				argcounter++;
+			}
+
+			if("exit".equals(lisp)) break;
+
+			// 字句解析
+			LexAnalysis token_Lex = new LexAnalysis(lisp);
+			String[] tokens_str = token_Lex.returnStr();
+
+			//字句解析結果確認用
+//			for(int i = 0; i <tokens_str.length ; i++ ){
 //			System.out.println(tokens_str[i]);
-//		}
+//			}
 
-		ArrayList<DefinitionCell> functions = new ArrayList<DefinitionCell>();
-		ArrayList<DefinitionCell> valiables = new ArrayList<DefinitionCell>();
+			// 変数置換
+			int counter = 0;
+			while( counter < valiables.size() ){
+				for( int i = 0; i < tokens_str.length ; i++ ){
+					if( tokens_str[i].matches( valiables.get(counter) ) ) tokens_str[i] = valiablevalues.get(counter) ;
+				}
+				counter++;
+			}
 
-		// 構文解析
-		SynAnalysis token_Syn = new SynAnalysis( tokens_str , functions , valiables);
-		ConsCell syntact = token_Syn.returnCC();
+			// 構文解析
+			SynAnalysis token_Syn = new SynAnalysis( tokens_str , functions , valiables, functionvalues , valiablevalues);
+			ConsCell syntact;
+			try{
+			syntact = token_Syn.returnCC();
+			} catch(ArrayIndexOutOfBoundsException e){
+				System.out.println("解析不能な構文");
+				continue;
+			}
 
-//		構文解析結果確認用
-		ConsCell.printConsCell(syntact);
-		System.out.println("");
+			// 構文解析結果確認用
+//			ConsCell.printConsCell(syntact);
+//			System.out.println("");
 
-		// 評価
-		Evaluation result = new Evaluation( syntact, functions , valiables );
-		System.out.println( "Answer: " + result.returnResult( syntact ));
+			// 評価
+			Evaluation result = new Evaluation( syntact, functions , valiables, functionvalues , valiablevalues );
+			System.out.println( "Output: " + result.returnResult( syntact ));
+
+
+		} while ( lisp != null );
 
 	}
 
