@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil 5:関数定義
+//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil 5:関数定義 6:関数内引数 7:定義された関数
 //	car		枝分かれ
 //	value	値
 //	cdr		次
@@ -46,13 +46,13 @@ public class ConsCell {
 
 			// 関数名か否かの判定
 			if( !functions.isEmpty() ){
-				if( functions.indexOf( this.value ) != -1 ) this.type = 2;
+				if( functions.indexOf( this.value ) != -1 ) this.type = 7;
 			}
 
 			// もとから実装している関数
-			if( this.type == 0 && this.value.matches("(if)|(setq)") ){
+			if( this.type == 0 && this.value.matches("setq") ){
 				this.type = 2;
-			}else if( this.type == 0 && this.value.matches("defun") ){
+			}else if( this.type == 0 && this.value.matches("(if)|(defun)") ){
 				this.type = 5;
 			}
 
@@ -90,6 +90,18 @@ public class ConsCell {
 	public ConsCell( String[] str ){
 		this( str, 0 , null , null , null , null );
 	}
+
+	public static ConsCell copyCC(ConsCell Cell) {
+
+		ConsCell newCell = new ConsCell( Cell.value );
+		newCell.type = Cell.type;
+		if( Cell.car != null ) newCell.car = copyCC( Cell.car );
+		if( Cell.cdr != null ) newCell.cdr = copyCC( Cell.cdr );
+
+		return newCell;
+	}
+
+
 
 	public static void printConsCell( ConsCell cc ){
 		int temp_counter;

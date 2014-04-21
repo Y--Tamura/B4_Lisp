@@ -7,14 +7,6 @@ public class B4_Lisp {
 
 	public static void main(String[] args) throws IOException {
 
-//		String lisp = "(+ 10 20)";
-//		String lisp = "(+ (* x 2)(- y 4) z)";
-//		String lisp = "(+ (* 2 3)(- 5 4) 3)";
-//		String lisp = "(defun func (x y)( + x y))";
-//		String lisp = "(if (= (+ 3 3) 6) 1.0 2.0)";
-//		String lisp = "(setq abc 100)";
-//		String lisp = "(defun function (a b) (+ a b))";
-
 		String lisp;
 		int argcounter = 0;
 
