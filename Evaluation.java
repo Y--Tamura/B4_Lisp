@@ -37,7 +37,6 @@ public class Evaluation {
 			permutation_value( tokens , valiables , valiablevalues );
 
 			// 終端へ移動
-
 			do{
 
 				if( !functions.isEmpty() ){
