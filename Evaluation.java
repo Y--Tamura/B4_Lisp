@@ -110,21 +110,36 @@ public class Evaluation {
 				compCell.type = operateCell.cdr.type;
 				operateCell.cdr.value = returnResult( compCell );
 
-				if( operateCell.cdr.value == "t" ){
-					if( operateCell.cdr.cdr.car != null ) checkCell.car = operateCell.cdr.cdr.car;
-					else checkCell.value = operateCell.cdr.cdr.value;
-				} else if( operateCell.cdr.value == "nil" ){
-					if( operateCell.cdr.cdr.car != null ) checkCell.car = operateCell.cdr.cdr.cdr.car;
-					else checkCell.value = operateCell.cdr.cdr.cdr.value;
-				} else{
+				if( operateCell.cdr.value == "t" ) operateCell = operateCell.cdr.cdr;
+				else if( operateCell.cdr.value == "nil" ) operateCell = operateCell.cdr.cdr.cdr;
+				else{
 					System.out.println("if文の記法が間違っているか、予期しないエラー。");
 					return "error";
 				}
+
+				// トークンがブロック
+				if( operateCell.car != null ){
+					checkCell.car = operateCell.car;
+				// トークンが要素
+				}else {
+					if( checkCell.cdr != tokens ){
+						checkCell.value = operateCell.value;
+					}else{
+						checkCell.cdr = operateCell;
+						checkCell.cdr.cdr = null;
+						checkCell.cdr.car = null;
+					}
+					checkCell.car = null;
+				}
+
 			}else if( functions.lastIndexOf(operateCell.value) != -1 ){
 				// 定義された関数
+				ConsCell tokenCell = ConsCell.copyCC( functionvalues.get( functions.lastIndexOf( operateCell.value ) ) );
+
+				checkCell.car = tokenCell.cdr.car;
 
 				ConsCell valiableCell = operateCell.cdr;
-				ConsCell valiablevCell = functionvalues.get( functions.lastIndexOf( operateCell.value ) ).car;
+				ConsCell valiablevCell = tokenCell.car;
 				while( valiableCell != null ){
 					if( valiableCell.value != null ){
 						valiablevalues.add( valiableCell.value );
@@ -133,11 +148,6 @@ public class Evaluation {
 						valiablevCell = valiablevCell.cdr;
 					}else break;
 				}
-
-//				tokens.car = functionvalues.get( functions.lastIndexOf( operateCell.value ) ).cdr.car ;
-				tokens.car = ConsCell.copyCC( functionvalues.get( functions.lastIndexOf( operateCell.value ) ).cdr.car );
-
-//				permutation_value( tokens.car , valiables , valiablevalues );
 
 			}else{
 				System.out.println("記法が間違っているか、予期しないエラー。(failure_in_operater-analysis.)");
@@ -184,7 +194,7 @@ public class Evaluation {
 		Stack<Double> values = new Stack<Double>();
 
 		while( temp != null ){
-			values.push( Double.valueOf( temp.value ) );
+			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
 
@@ -241,7 +251,7 @@ public class Evaluation {
 		Stack<Double> values = new Stack<Double>();
 
 		while( temp != null ){
-			values.push( Double.valueOf( temp.value ) );
+			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
 
