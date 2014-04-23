@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil 5:関数定義 6:関数内引数 7:定義された関数
+//	type	0:未指定 1:数値 2:演算子 3:カッコ 4:t/nil 5:関数定義 6:関数内引数候補 7:定義された関数
 //	car		枝分かれ
 //	value	値
 //	cdr		次
@@ -73,7 +73,7 @@ public class ConsCell {
 					Double.parseDouble( str[counter] );
 					this.type = 1;
 				} catch(NumberFormatException e){
-					this.type = 0;
+					this.type = 6;
 				}
 			}
 

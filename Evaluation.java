@@ -27,7 +27,7 @@ public class Evaluation {
 		ConsCell checkCell = tokens;
 		ConsCell operateCell;
 
-		permutation_value( tokens , valiables , valiablevalues );
+//		permutation_value( tokens , valiables , valiablevalues );
 
 		do{
 
@@ -92,12 +92,12 @@ public class Evaluation {
 				this.functions.add( operateCell.cdr.value );
 				this.functionvalues.add( operateCell.cdr.cdr );
 
-				ConsCell valiableCell = operateCell.cdr.cdr.car;
-				ConsCell searchCell = operateCell.cdr.cdr.cdr.car;
-				while( valiableCell != null ){
-					permutation( valiableCell.value , searchCell );
-					valiableCell = valiableCell.cdr;
-				}
+//				ConsCell valiableCell = operateCell.cdr.cdr.car;
+//				ConsCell searchCell = operateCell.cdr.cdr.cdr.car;
+//				while( valiableCell != null ){
+//					permutation( valiableCell.value , searchCell );
+//					valiableCell = valiableCell.cdr;
+//				}
 
 				checkCell.car = null;
 				checkCell.value = "defun " + operateCell.cdr.value;
@@ -194,31 +194,34 @@ public class Evaluation {
 				return "error";
 			}
 
-//		}while( tokens.cdr != null || tokens.car != null );
-		}while( ( tokens.cdr != null && ( tokens.cdr.cdr != null || tokens.cdr.car != null ) ) || tokens.car != null );
+		}while( tokens.cdr != null || tokens.car != null );
+//		}while( ( tokens.cdr != null && ( tokens.cdr.cdr != null || tokens.cdr.car != null ) ) || tokens.car != null );
 
 		return tokens.value;
 	}
 
 
-	private void permutation( String value , ConsCell searchCell) {
-
-		if( searchCell.value != null && searchCell.type == 0 ){
-			if( value.matches( searchCell.value ) ){
-				searchCell.type = 6;
-			}
-		}
-
-		if( searchCell.car != null ) permutation( value , searchCell.car );
-		if( searchCell.cdr != null ) permutation( value , searchCell.cdr );
-
-	}
+//	private void permutation( String value , ConsCell searchCell) {
+//
+//		if( searchCell.type == 0 && searchCell.value != null  ){
+//			if( value.matches( searchCell.value ) ){
+//				searchCell.type = 6;
+//			}
+//		}
+//
+//		if( searchCell.car != null ) permutation( value , searchCell.car );
+//		if( searchCell.cdr != null ) permutation( value , searchCell.cdr );
+//
+//	}
 
 
 	private void permutation_value(ConsCell Cell, ArrayList<String> vs, ArrayList<String> vvs) {
 
-		if( vs.lastIndexOf( Cell.value ) != -1 ){
-			Cell.value = vvs.get( vs.lastIndexOf( Cell.value ) );
+		if( Cell.type == 6 ){
+			int index = vs.lastIndexOf( Cell.value );
+			if( index != -1 ){
+				Cell.value = vvs.get( index );
+			}
 		}
 
 		if( Cell.car != null ) permutation_value( Cell.car , vs , vvs );
@@ -235,9 +238,9 @@ public class Evaluation {
 		Stack<Double> values = new Stack<Double>();
 
 		while( temp != null ){
-			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
-				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
-			}else
+//			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
+//				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
+//			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
@@ -250,17 +253,17 @@ public class Evaluation {
 		double num = 0.0 ;
 		int size = values.size();
 
-		if( operater.equals("+") ) {
+		if( "+".equals(operater) ) {
 			num = 0.0;
 			for( int i = 0; i < size; i++ ){
 				num += values.pop();
 			}
-		} else if( operater.equals("*") ){
+		} else if( "*".equals(operater) ){
 			num = 1.0;
 			for( int i = 0; i < size; i++ ){
 				num *= values.pop();
 			}
-		} else if( operater.equals("-") ){
+		} else if( "-".equals(operater) ){
 			if( size != 2 ){
 				System.out.println("減算は２項演算です");
 				return "error";
@@ -269,7 +272,7 @@ public class Evaluation {
 				double m = values.pop();
 				num = m - n;
 			}
-		} else if( operater.equals("/") ){
+		} else if( "/".equals(operater) ){
 			if( size != 2 ){
 				System.out.println("除算は２項演算です");
 				return "error";
@@ -295,9 +298,9 @@ public class Evaluation {
 		Stack<Double> values = new Stack<Double>();
 
 		while( temp != null ){
-			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
-				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
-			}else
+//			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
+//				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
+//			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
