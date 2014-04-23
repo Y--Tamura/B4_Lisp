@@ -13,7 +13,7 @@ public class Evaluation {
 		this( tokens, null , null , null , null );
 	}
 
-	public Evaluation(ConsCell tokens, ArrayList<String> functions , ArrayList<String> valiables , ArrayList<ConsCell> functionvalues , ArrayList<String> valiablevalues ) {
+	public Evaluation(ConsCell tokens, ArrayList<String> functions, ArrayList<String> valiables, ArrayList<ConsCell> functionvalues, ArrayList<String> valiablevalues ) {
 		token_CC = tokens;
 		this.functions = functions;
 		this.valiables = valiables;
@@ -27,6 +27,7 @@ public class Evaluation {
 		ConsCell checkCell = tokens;
 		ConsCell operateCell;
 
+		permutation_value( tokens , valiables , valiablevalues );
 
 		do{
 
@@ -34,7 +35,7 @@ public class Evaluation {
 			operateCell = null;
 
 
-			permutation_value( tokens , valiables , valiablevalues );
+//			permutation_value( tokens , valiables , valiablevalues );
 
 			// 終端へ移動
 			do{
@@ -133,9 +134,10 @@ public class Evaluation {
 
 			}else if( functions.lastIndexOf(operateCell.value) != -1 ){
 				// 定義された関数
+// ディープコピー版(一応完成)
 				ConsCell tokenCell = ConsCell.copyCC( functionvalues.get( functions.lastIndexOf( operateCell.value ) ) );
-
 				checkCell.car = tokenCell.cdr.car;
+
 
 				ConsCell valiableCell = operateCell.cdr;
 				ConsCell valiablevCell = tokenCell.car;
@@ -148,12 +150,52 @@ public class Evaluation {
 					}else break;
 				}
 
+				permutation_value( checkCell.car , valiables , valiablevalues );
+
+// 参照版(未完成)
+//				ConsCell tokenCell = functionvalues.get( functions.lastIndexOf( operateCell.value ) ) ;
+//
+//				checkCell.car = tokenCell.cdr.car;
+//
+//				ConsCell valiableCell = operateCell.cdr;
+//				ConsCell valiablevCell = tokenCell.car;
+//				while( valiableCell != null ){
+//					if( valiableCell.value != null ){
+//						valiablevalues.add( valiableCell.value );
+//						valiables.add( valiablevCell.value );
+//						valiableCell = valiableCell.cdr;
+//						valiablevCell = valiablevCell.cdr;
+//					}else break;
+//				}
+//
+//				if( checkCell.cdr != tokens ){
+//					checkCell.value = returnResult( tokenCell.cdr );
+//				}else{
+//					checkCell.cdr = new ConsCell( returnResult( tokenCell.cdr ) );
+//					checkCell.cdr.cdr = null;
+//					checkCell.cdr.car = null;
+//				}
+//				checkCell.car = null;
+//
+//				valiableCell = operateCell.cdr;
+//				valiablevCell = tokenCell.car;
+//				while( valiableCell != null ){
+//					if( valiableCell.value != null && valiables.lastIndexOf(valiablevCell.value) != -1 ){
+//						valiablevalues.remove( valiablevalues.lastIndexOf(valiableCell.value) );
+//						valiables.remove( valiables.lastIndexOf(valiablevCell.value) );
+//						valiableCell = valiableCell.cdr;
+//						valiablevCell = valiablevCell.cdr;
+//					}else break;
+//				}
+
+
 			}else{
 				System.out.println("記法が間違っているか、予期しないエラー。(failure_in_operater-analysis.)");
 				return "error";
 			}
 
-		}while( tokens.cdr != null || tokens.car != null );
+//		}while( tokens.cdr != null || tokens.car != null );
+		}while( ( tokens.cdr != null && ( tokens.cdr.cdr != null || tokens.cdr.car != null ) ) || tokens.car != null );
 
 		return tokens.value;
 	}
@@ -193,6 +235,9 @@ public class Evaluation {
 		Stack<Double> values = new Stack<Double>();
 
 		while( temp != null ){
+			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
+				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
+			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
@@ -250,6 +295,9 @@ public class Evaluation {
 		Stack<Double> values = new Stack<Double>();
 
 		while( temp != null ){
+			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
+				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
+			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
