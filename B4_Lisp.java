@@ -14,6 +14,8 @@ public class B4_Lisp {
 		ArrayList<ConsCell> functionvalues = new ArrayList<ConsCell>();
 		ArrayList<String> valiables = new ArrayList<String>();
 		ArrayList<String> valiablevalues = new ArrayList<String>();
+		long start = 0;
+		long stop = 0;
 
 		do{
 
@@ -39,13 +41,13 @@ public class B4_Lisp {
 //			}
 
 			// 変数置換
-			int counter = 0;
-			while( counter < valiables.size() ){
-				for( int i = 0; i < tokens_str.length ; i++ ){
-					if( tokens_str[i].matches( valiables.get(counter) ) ) tokens_str[i] = valiablevalues.get(counter) ;
-				}
-				counter++;
-			}
+//			int counter = 0;
+//			while( counter < valiables.size() ){
+//				for( int i = 0; i < tokens_str.length ; i++ ){
+//					if( tokens_str[i].matches( valiables.get(counter) ) ) tokens_str[i] = valiablevalues.get(counter) ;
+//				}
+//				counter++;
+//			}
 
 			// 構文解析
 			SynAnalysis token_Syn = new SynAnalysis( tokens_str , functions , valiables, functionvalues , valiablevalues);
@@ -62,8 +64,13 @@ public class B4_Lisp {
 //			System.out.println("");
 
 			// 評価
+			start = System.currentTimeMillis();
 			Evaluation result = new Evaluation( syntact, functions , valiables, functionvalues , valiablevalues );
-			System.out.println( "Output: " + result.returnResult( syntact ));
+			System.out.println( "Output: " + result.rR( syntact ));
+			stop = System.currentTimeMillis();
+			System.out.println("  time: " + (stop-start) + "[ms]" );
+			ConsCell.returnCopycount();
+			result.returnPerCount();
 
 
 		} while ( lisp != null );

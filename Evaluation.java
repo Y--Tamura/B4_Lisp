@@ -8,6 +8,7 @@ public class Evaluation {
 	public ConsCell token_CC;
 	public ArrayList<String> functions, valiables, valiablevalues;
 	public ArrayList<ConsCell> functionvalues;
+	private int per_count = 0;
 
 	public Evaluation(ConsCell tokens) {
 		this( tokens, null , null , null , null );
@@ -21,11 +22,17 @@ public class Evaluation {
 		this.valiablevalues = valiablevalues;
 	}
 
-	public String returnResult( ConsCell tokens ){
+	public String rR( ConsCell CC){
+		return returnResult(CC);
+	}
+
+	private String returnResult( ConsCell tokens ){
 
 		ConsCell temp ;
 		ConsCell checkCell = tokens;
 		ConsCell operateCell;
+		int index;
+//		long start, stop;
 
 //		permutation_value( tokens , valiables , valiablevalues );
 
@@ -74,7 +81,7 @@ public class Evaluation {
 				checkCell.value = compare( operateCell.value , operateCell.cdr );
 				checkCell.car = null;
 				checkCell.type = 4;
-			}else if( operateCell.value.matches("setq") ){
+			}else if( "setq".equals(operateCell.value) ){
 				// 変数定義
 				if( operateCell.cdr.cdr != null ){
 					checkCell.value = operateCell.cdr.cdr.value;
@@ -87,7 +94,7 @@ public class Evaluation {
 				}
 				checkCell.car = null;
 				checkCell.type = 1;
-			}else if( operateCell.value.matches("defun") ){
+			}else if( "defun".equals( operateCell.value ) ){
 				// 関数定義
 				this.functions.add( operateCell.cdr.value );
 				this.functionvalues.add( operateCell.cdr.cdr );
@@ -102,7 +109,7 @@ public class Evaluation {
 				checkCell.car = null;
 				checkCell.value = "defun " + operateCell.cdr.value;
 				checkCell.type = 1;
-			}else if( operateCell.value.matches("if") ){
+			}else if( "if".equals( operateCell.value ) ){
 				// if文
 				ConsCell compCell = new ConsCell( operateCell.cdr.value );
 				compCell.car = operateCell.cdr.car;
@@ -110,8 +117,8 @@ public class Evaluation {
 				compCell.type = operateCell.cdr.type;
 				operateCell.cdr.value = returnResult( compCell );
 
-				if( operateCell.cdr.value == "t" ) operateCell = operateCell.cdr.cdr;
-				else if( operateCell.cdr.value == "nil" ) operateCell = operateCell.cdr.cdr.cdr;
+				if( "t".equals( operateCell.cdr.value )) operateCell = operateCell.cdr.cdr;
+				else if( "nil".equals( operateCell.cdr.value )) operateCell = operateCell.cdr.cdr.cdr;
 				else{
 					System.out.println("if文の記法が間違っているか、予期しないエラー。");
 					return "error";
@@ -132,29 +139,43 @@ public class Evaluation {
 					checkCell.car = null;
 				}
 
-			}else if( functions.lastIndexOf(operateCell.value) != -1 ){
+			}else if( (index = functions.lastIndexOf(operateCell.value)) != -1 ){
 				// 定義された関数
 // ディープコピー版(一応完成)
-				ConsCell tokenCell = ConsCell.copyCC( functionvalues.get( functions.lastIndexOf( operateCell.value ) ) );
+				operateCell = operateCell.cdr;
+				ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );
 				checkCell.car = tokenCell.cdr.car;
-
-
-				ConsCell valiableCell = operateCell.cdr;
-				ConsCell valiablevCell = tokenCell.car;
-				while( valiableCell != null ){
-					if( valiableCell.value != null ){
-						valiablevalues.add( valiableCell.value );
-						valiables.add( valiablevCell.value );
-						valiableCell = valiableCell.cdr;
-						valiablevCell = valiablevCell.cdr;
+				tokenCell = tokenCell.car;
+				while( operateCell != null ){
+					if( operateCell.value != null ){
+						valiablevalues.add( operateCell.value );
+						valiables.add( tokenCell.value );
+						operateCell = operateCell.cdr;
+						tokenCell = tokenCell.cdr;
 					}else break;
 				}
 
-				permutation_value( checkCell.car , valiables , valiablevalues );
+				permutation_value( checkCell.car );
+
+
+// ディープコピー版(同時に変数置換)
+//				operateCell = operateCell.cdr;
+//				ConsCell vCell = functionvalues.get( index ).car;
+//				while( operateCell != null ){
+//					if( operateCell.value != null ){
+//						valiablevalues.add( operateCell.value );
+//						valiables.add( vCell.value );
+//						operateCell = operateCell.cdr;
+//						vCell = vCell.cdr;
+//					}else break;
+//				}
+//				ConsCell tokenCell = ConsCell.CCa( functionvalues.get( index ),valiables ,valiablevalues );
+//				checkCell.car = tokenCell.cdr.car;
+//
+
 
 // 参照版(未完成)
-//				ConsCell tokenCell = functionvalues.get( functions.lastIndexOf( operateCell.value ) ) ;
-//
+//				ConsCell tokenCell = functionvalues.get( index );
 //				checkCell.car = tokenCell.cdr.car;
 //
 //				ConsCell valiableCell = operateCell.cdr;
@@ -215,31 +236,40 @@ public class Evaluation {
 //	}
 
 
-	private void permutation_value(ConsCell Cell, ArrayList<String> vs, ArrayList<String> vvs) {
+	private void permutation_value( ConsCell Cell ) {
+
+		per_count++;
 
 		if( Cell.type == 6 ){
-			int index = vs.lastIndexOf( Cell.value );
+			int index = this.valiables.lastIndexOf( Cell.value );
 			if( index != -1 ){
-				Cell.value = vvs.get( index );
+				Cell.value = this.valiablevalues.get( index );
 			}
 		}
 
-		if( Cell.car != null ) permutation_value( Cell.car , vs , vvs );
-		if( Cell.cdr != null ) permutation_value( Cell.cdr , vs , vvs );
+		if( Cell.car != null ) permutation_value( Cell.car );
+		if( Cell.cdr != null ) permutation_value( Cell.cdr );
 
 	}
 
+	public void returnPerCount(){
+		if(per_count != 0) {
+			System.out.println("  Perm :" + per_count );
+			per_count = 0;
+		}
 
+	}
 
 	// 四則演算
 	private String operate(String operater, ConsCell operateCC) {
 
 		ConsCell temp = operateCC;
 		Stack<Double> values = new Stack<Double>();
+//		int index = -1;
 
 		while( temp != null ){
-//			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
-//				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
+//			if( temp.value != null && (index = valiables.lastIndexOf( temp.value )) != -1 ){
+//				values.push( Double.valueOf( valiablevalues.get( index ) ));
 //			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
@@ -286,6 +316,7 @@ public class Evaluation {
 				return "error";
 		}
 
+	values.clear();
 	return String.valueOf(num);
 
 	}
@@ -296,16 +327,17 @@ public class Evaluation {
 
 		ConsCell temp = operateCC;
 		Stack<Double> values = new Stack<Double>();
+//		int index = -1;
 
 		while( temp != null ){
-//			if( temp.value != null && valiables.lastIndexOf( temp.value ) != -1 ){
-//				values.push( Double.valueOf( valiablevalues.get( valiables.lastIndexOf( temp.value ) ) ));
+//			if( temp.value != null && (index = valiables.lastIndexOf( temp.value )) != -1 ){
+//				values.push( Double.valueOf( valiablevalues.get( index ) ));
 //			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
 
-		String value = null ;
+		String value ;
 		int size = values.size();
 
 		if( values.empty() || size != 2 ){
@@ -336,6 +368,7 @@ public class Evaluation {
 			return "error";
 		}
 
+		values.clear();
 		return value;
 	}
 

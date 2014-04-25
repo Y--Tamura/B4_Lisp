@@ -12,6 +12,7 @@ public class ConsCell {
 	public ConsCell cdr = null;
 	public String value = null;
 	private static int printcounter = 0;
+	private static int copycounter = 0;
 
 	public ConsCell( String str ){
 		this.value = str;
@@ -91,17 +92,59 @@ public class ConsCell {
 		this( str, 0 , null , null , null , null );
 	}
 
-	public static ConsCell copyCC(ConsCell Cell) {
+	private static ConsCell copyCC(ConsCell Cell ) {
+		copycounter++;
+		if(Cell.value == null && Cell.cdr == null && Cell.car == null) return null;
+		else{
+			ConsCell newCell = new ConsCell( Cell.value );
+			newCell.type = Cell.type;
+			newCell.value = Cell.value;
 
-		ConsCell newCell = new ConsCell( Cell.value );
-		newCell.type = Cell.type;
-		if( Cell.car != null ) newCell.car = copyCC( Cell.car );
-		if( Cell.cdr != null ) newCell.cdr = copyCC( Cell.cdr );
+			if( Cell.car != null ) newCell.car = copyCC( Cell.car );
+			if( Cell.cdr != null ) newCell.cdr = copyCC( Cell.cdr );
 
-		return newCell;
+			return newCell;
+		}
+
+	}
+
+	private static ConsCell copyCCa(ConsCell Cell, ArrayList<String> vs, ArrayList<String> vvs ) {
+		copycounter++;
+		if(Cell.value == null && Cell.cdr == null && Cell.car == null) return null;
+		else{
+			ConsCell newCell = new ConsCell( Cell.value );
+			newCell.type = Cell.type;
+			if( Cell.type == 6 ){
+				int index = vs.lastIndexOf( Cell.value );
+				if( index != -1 ){
+					newCell.value = vvs.get( index );
+					newCell.type = 1;
+				} else newCell.value = Cell.value;
+			} else newCell.value = Cell.value;
+
+			if( Cell.car != null ) newCell.car = copyCCa( Cell.car, vs, vvs );
+			if( Cell.cdr != null ) newCell.cdr = copyCCa( Cell.cdr, vs, vvs );
+
+			return newCell;
+		}
+
+	}
+
+	public static ConsCell CC( ConsCell CC ){
+		return copyCC( CC );
+	}
+
+	public static ConsCell CCa( ConsCell CC, ArrayList<String> vs, ArrayList<String> vvs ){
+		return copyCCa( CC, vs, vvs );
 	}
 
 
+	public static void returnCopycount( ){
+		if(copycounter != 0 ){
+			System.out.println("  copy: " + copycounter);
+			copycounter = 0;
+		}
+	}
 
 	public static void printConsCell( ConsCell cc ){
 		int temp_counter;
