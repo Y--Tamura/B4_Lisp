@@ -70,7 +70,6 @@ public class B4_Lisp {
 			stop = System.currentTimeMillis();
 			System.out.println("  time: " + (stop-start) + "[ms]" );
 			ConsCell.returnCopycount();
-			result.returnPerCount();
 
 
 		} while ( lisp != null );

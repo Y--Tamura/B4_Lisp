@@ -108,34 +108,9 @@ public class ConsCell {
 
 	}
 
-	private static ConsCell copyCCa(ConsCell Cell, ArrayList<String> vs, ArrayList<String> vvs ) {
-		copycounter++;
-		if(Cell.value == null && Cell.cdr == null && Cell.car == null) return null;
-		else{
-			ConsCell newCell = new ConsCell( Cell.value );
-			newCell.type = Cell.type;
-			if( Cell.type == 6 ){
-				int index = vs.lastIndexOf( Cell.value );
-				if( index != -1 ){
-					newCell.value = vvs.get( index );
-					newCell.type = 1;
-				} else newCell.value = Cell.value;
-			} else newCell.value = Cell.value;
-
-			if( Cell.car != null ) newCell.car = copyCCa( Cell.car, vs, vvs );
-			if( Cell.cdr != null ) newCell.cdr = copyCCa( Cell.cdr, vs, vvs );
-
-			return newCell;
-		}
-
-	}
 
 	public static ConsCell CC( ConsCell CC ){
 		return copyCC( CC );
-	}
-
-	public static ConsCell CCa( ConsCell CC, ArrayList<String> vs, ArrayList<String> vvs ){
-		return copyCCa( CC, vs, vvs );
 	}
 
 

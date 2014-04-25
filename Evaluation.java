@@ -1,4 +1,6 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Stack;
 
 
@@ -8,7 +10,8 @@ public class Evaluation {
 	public ConsCell token_CC;
 	public ArrayList<String> functions, valiables, valiablevalues;
 	public ArrayList<ConsCell> functionvalues;
-	private int per_count = 0;
+	public Deque<Integer> indexs = new ArrayDeque<Integer>();
+
 
 	public Evaluation(ConsCell tokens) {
 		this( tokens, null , null , null , null );
@@ -142,52 +145,22 @@ public class Evaluation {
 			}else if( (index = functions.lastIndexOf(operateCell.value)) != -1 ){
 				// 定義された関数
 // ディープコピー版(一応完成)
-				operateCell = operateCell.cdr;
-				ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );
-				checkCell.car = tokenCell.cdr.car;
-				tokenCell = tokenCell.car;
-				while( operateCell != null ){
-					if( operateCell.value != null ){
-						valiablevalues.add( operateCell.value );
-						valiables.add( tokenCell.value );
-						operateCell = operateCell.cdr;
-						tokenCell = tokenCell.cdr;
-					}else break;
-				}
-
-				permutation_value( checkCell.car );
-
-
-// ディープコピー版(同時に変数置換)
-//				operateCell = operateCell.cdr;
-//				ConsCell vCell = functionvalues.get( index ).car;
-//				while( operateCell != null ){
-//					if( operateCell.value != null ){
-//						valiablevalues.add( operateCell.value );
-//						valiables.add( vCell.value );
-//						operateCell = operateCell.cdr;
+//				ConsCell vCell = operateCell.cdr;
+//				ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );
+//
+//				ConsCell vvCell = tokenCell.car;
+//				while( vCell != null ){
+//					if( vCell.value != null ){
+//						valiablevalues.add( vCell.value );
+//						valiables.add( vvCell.value );
+//						indexs.addFirst( valiables.lastIndexOf( vvCell.value ) );
 //						vCell = vCell.cdr;
+//						vvCell = vvCell.cdr;
 //					}else break;
 //				}
-//				ConsCell tokenCell = ConsCell.CCa( functionvalues.get( index ),valiables ,valiablevalues );
-//				checkCell.car = tokenCell.cdr.car;
 //
-
-
-// 参照版(未完成)
-//				ConsCell tokenCell = functionvalues.get( index );
-//				checkCell.car = tokenCell.cdr.car;
+//				permutation_value( tokenCell.cdr.car );
 //
-//				ConsCell valiableCell = operateCell.cdr;
-//				ConsCell valiablevCell = tokenCell.car;
-//				while( valiableCell != null ){
-//					if( valiableCell.value != null ){
-//						valiablevalues.add( valiableCell.value );
-//						valiables.add( valiablevCell.value );
-//						valiableCell = valiableCell.cdr;
-//						valiablevCell = valiablevCell.cdr;
-//					}else break;
-//				}
 //
 //				if( checkCell.cdr != tokens ){
 //					checkCell.value = returnResult( tokenCell.cdr );
@@ -196,18 +169,45 @@ public class Evaluation {
 //					checkCell.cdr.cdr = null;
 //					checkCell.cdr.car = null;
 //				}
-//				checkCell.car = null;
 //
-//				valiableCell = operateCell.cdr;
-//				valiablevCell = tokenCell.car;
-//				while( valiableCell != null ){
-//					if( valiableCell.value != null && valiables.lastIndexOf(valiablevCell.value) != -1 ){
-//						valiablevalues.remove( valiablevalues.lastIndexOf(valiableCell.value) );
-//						valiables.remove( valiables.lastIndexOf(valiablevCell.value) );
-//						valiableCell = valiableCell.cdr;
-//						valiablevCell = valiablevCell.cdr;
-//					}else break;
+//
+//				checkCell.car = null;
+
+//				while( indexs.size() != 0 && indexs.peekFirst() != null ){
+//					valiablevalues.remove( indexs.peekFirst() );
+//					valiables.remove( indexs.removeFirst() );
 //				}
+
+// 参照版
+				ConsCell vCell = operateCell.cdr;
+				ConsCell tokenCell =  functionvalues.get( index );
+
+				ConsCell vvCell = tokenCell.car;
+				while( vCell != null ){
+					if( vCell.value != null ){
+						valiablevalues.add( vCell.value );
+						valiables.add( vvCell.value );
+						indexs.addFirst( valiables.lastIndexOf( vvCell.value ) );
+						vCell = vCell.cdr;
+						vvCell = vvCell.cdr;
+					}else break;
+				}
+
+//				if( checkCell.cdr != tokens ){
+					checkCell.value = returnResult( tokenCell.cdr );
+//				}else{
+//					checkCell.cdr = new ConsCell( returnResult( tokenCell.cdr ) );
+//					checkCell.cdr.cdr = null;
+//					checkCell.cdr.car = null;
+//				}
+
+
+				checkCell.car = null;
+
+				while( indexs.size() != 0 && indexs.peekFirst() != null ){
+					valiablevalues.remove( indexs.peekFirst() );
+					valiables.remove( indexs.removeFirst() );
+				}
 
 
 			}else{
@@ -238,7 +238,6 @@ public class Evaluation {
 
 	private void permutation_value( ConsCell Cell ) {
 
-		per_count++;
 
 		if( Cell.type == 6 ){
 			int index = this.valiables.lastIndexOf( Cell.value );
@@ -252,25 +251,18 @@ public class Evaluation {
 
 	}
 
-	public void returnPerCount(){
-		if(per_count != 0) {
-			System.out.println("  Perm :" + per_count );
-			per_count = 0;
-		}
-
-	}
 
 	// 四則演算
 	private String operate(String operater, ConsCell operateCC) {
 
 		ConsCell temp = operateCC;
 		Stack<Double> values = new Stack<Double>();
-//		int index = -1;
+		int index = -1;
 
 		while( temp != null ){
-//			if( temp.value != null && (index = valiables.lastIndexOf( temp.value )) != -1 ){
-//				values.push( Double.valueOf( valiablevalues.get( index ) ));
-//			}else
+			if( temp.value != null && (index = valiables.lastIndexOf( temp.value )) != -1 ){
+				values.push( Double.valueOf( valiablevalues.get( index ) ));
+			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
@@ -327,12 +319,12 @@ public class Evaluation {
 
 		ConsCell temp = operateCC;
 		Stack<Double> values = new Stack<Double>();
-//		int index = -1;
+		int index = -1;
 
 		while( temp != null ){
-//			if( temp.value != null && (index = valiables.lastIndexOf( temp.value )) != -1 ){
-//				values.push( Double.valueOf( valiablevalues.get( index ) ));
-//			}else
+			if( temp.value != null && (index = valiables.lastIndexOf( temp.value )) != -1 ){
+				values.push( Double.valueOf( valiablevalues.get( index ) ));
+			}else
 			if( temp.value != null ) values.push( Double.valueOf( temp.value ) );
 			temp = temp.cdr;
 		}
