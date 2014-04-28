@@ -5,32 +5,27 @@ import java.util.Stack;
 public class Evaluation {
 
 	public String value = null;
-	public ConsCell token_CC;
+	public ConsCell fixMeCell;
 	public ArrayList<String> functions, valiables, valiablevalues;
 	public ArrayList<ConsCell> functionvalues;
 //	public Deque<Integer> indexs = new ArrayDeque<Integer>();
 
 
-	public Evaluation(ConsCell tokens) {
-		this( tokens, null , null , null , null );
+	public Evaluation(ConsCell cell) {
+		this( cell, null , null , null , null );
 	}
 
-	public Evaluation(ConsCell tokens, ArrayList<String> functions, ArrayList<String> valiables, ArrayList<ConsCell> functionvalues, ArrayList<String> valiablevalues ) {
-		token_CC = tokens;
+	public Evaluation(ConsCell cell, ArrayList<String> functions, ArrayList<String> valiables, ArrayList<ConsCell> functionvalues, ArrayList<String> valiablevalues ) {
+		fixMeCell = cell;
 		this.functions = functions;
 		this.valiables = valiables;
 		this.functionvalues = functionvalues;
 		this.valiablevalues = valiablevalues;
 	}
 
-	public String rR( ConsCell CC){
-		return returnResult(CC);
-	}
-
-	private String returnResult( ConsCell tokens ){
-
-		ConsCell temp ;
-		ConsCell checkCell = tokens;
+	public String returnResult( ConsCell cell){
+		ConsCell temp;
+		ConsCell checkCell = cell;
 		ConsCell operateCell;
 		int index;
 //		long start, stop;
@@ -39,7 +34,7 @@ public class Evaluation {
 
 		do{
 
-			temp = tokens;
+			temp = cell;
 			operateCell = null;
 
 
@@ -48,8 +43,8 @@ public class Evaluation {
 			// 終端へ移動
 			do{
 
-				if( !functions.isEmpty() ){
-					if( functions.indexOf( temp.value ) != -1 ) temp.type = 7;
+				if( functions.indexOf( temp.value ) != -1 ){
+					temp.type = 7;
 				}
 
 				if( temp.type == 2 || temp.type == 7 ) operateCell = temp;
@@ -130,7 +125,7 @@ public class Evaluation {
 					checkCell.car = operateCell.car;
 				// トークンが要素
 				}else {
-					if( checkCell.cdr != tokens ){
+					if( checkCell.cdr != cell ){
 						checkCell.value = operateCell.value;
 					}else{
 						checkCell.cdr = operateCell;
@@ -160,7 +155,7 @@ public class Evaluation {
 				permutation_value( tokenCell.cdr.car );
 
 
-				if( checkCell.cdr != tokens ){
+				if( checkCell.cdr != cell ){
 					checkCell.value = returnResult( tokenCell.cdr );
 				}else{
 					checkCell.cdr = new ConsCell( returnResult( tokenCell.cdr ) );
@@ -213,10 +208,10 @@ public class Evaluation {
 				return "error";
 			}
 
-		}while( tokens.cdr != null || tokens.car != null );
+		}while( cell.cdr != null || cell.car != null );
 //		}while( ( tokens.cdr != null && ( tokens.cdr.cdr != null || tokens.cdr.car != null ) ) || tokens.car != null );
 
-		return tokens.value;
+		return cell.value;
 	}
 
 

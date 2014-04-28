@@ -65,8 +65,8 @@ public class B4_Lisp {
 
 			// 評価
 			start = System.currentTimeMillis();
-			Evaluation result = new Evaluation( syntact, functions , valiables, functionvalues , valiablevalues );
-			System.out.println( "Output: " + result.rR( syntact ));
+			Evaluation3 result = new Evaluation3( syntact, functions , valiables, functionvalues , valiablevalues );
+			System.out.println( "Output: " + result.returnResult( syntact ));
 			stop = System.currentTimeMillis();
 			System.out.println("  time: " + (stop-start) + "[ms]" );
 //			ConsCell.returnCopycount();
