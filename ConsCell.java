@@ -109,10 +109,38 @@ public class ConsCell {
 	}
 
 
+	public static ConsCell CCf( ConsCell CC, ArrayList<String> a, ArrayList<String> b ){
+		return copyCCf( CC, a, b );
+	}
+
+
+	private static ConsCell copyCCf(ConsCell Cell, ArrayList<String> k, ArrayList<String> v ) {
+		copycounter++;
+		if(Cell.value == null && Cell.cdr == null && Cell.car == null) return null;
+		else{
+			ConsCell newCell = new ConsCell( Cell.value );
+			newCell.type = Cell.type;
+			newCell.value = Cell.value;
+
+			if( newCell.type == 6 ){
+				int index = k.lastIndexOf( Cell.value );
+				if( index != -1 ){
+					newCell.value = v.get( index );
+				}
+			}
+
+			if( Cell.car != null ) newCell.car = copyCCf( Cell.car, k, v );
+			if( Cell.cdr != null ) newCell.cdr = copyCCf( Cell.cdr, k, v );
+
+			return newCell;
+		}
+
+	}
+
+
 	public static ConsCell CC( ConsCell CC ){
 		return copyCC( CC );
 	}
-
 
 	public static void returnCopycount( ){
 		if(copycounter != 0 ){
@@ -142,5 +170,7 @@ public class ConsCell {
 		}
 
 	}
+
+
 
 }

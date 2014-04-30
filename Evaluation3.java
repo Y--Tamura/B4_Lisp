@@ -8,6 +8,7 @@ public class Evaluation3 {
 	public ConsCell fixMeCell;
 	public ArrayList<String> functions, valiables, valiablevalues;
 	public ArrayList<ConsCell> functionvalues;
+	private ArrayList<String> keys, vals;
 //	public Deque<Integer> indexs = new ArrayDeque<Integer>();
 
 
@@ -16,11 +17,15 @@ public class Evaluation3 {
 	}
 
 	public Evaluation3(ConsCell cell, ArrayList<String> functions, ArrayList<String> valiables, ArrayList<ConsCell> functionvalues, ArrayList<String> valiablevalues ) {
+		ArrayList<String> k = new ArrayList<String>();
+		ArrayList<String> v = new ArrayList<String>();
 		fixMeCell = cell;
 		this.functions = functions;
 		this.valiables = valiables;
 		this.functionvalues = functionvalues;
 		this.valiablevalues = valiablevalues;
+		this.keys = k;
+		this.vals = v;
 	}
 
 	public String returnResult( ConsCell cell){
@@ -63,32 +68,27 @@ public class Evaluation3 {
 		}else if( (index = functions.lastIndexOf(operateCell.value)) != -1 ){
 			// 定義された関数
 			ConsCell vCell = operateCell.cdr;
-			ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );	// ディープコピー
-//			ConsCell tokenCell = functionvalues.get( index );					// 参照
-			int count = 0;
+//			ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );	// ディープコピー
+			ConsCell tokenCell = functionvalues.get( index );					// 参照
 
 			ConsCell vvCell = tokenCell.car;
 			while( vCell != null && vvCell != null ){
 //				if( vCell.value != null ){
-					valiablevalues.add( returnResult(vCell) );
-					valiables.add( vvCell.value );
-					count++;
+					this.vals.add( returnResult(vCell) );
+					this.keys.add( vvCell.value );
 					vCell = vCell.cdr;
 					vvCell = vvCell.cdr;
 //				}else break;
 			}
 
-			permutation_value( tokenCell.cdr );
+			tokenCell = ConsCell.CCf( functionvalues.get( index ), this.keys, this.vals );
+
+//			permutation_value( tokenCell.cdr );
+			this.keys.clear();
+			this.vals.clear();
 			String result = returnResult( tokenCell.cdr );
 
 			tokenCell = null;
-
-			int listSize = valiables.size();
-			for(int i = 0; i < count ; i++){
-				listSize--;
-				valiables.remove( listSize );
-				valiablevalues.remove( listSize );
-			}
 
 			return result;
 
@@ -102,9 +102,9 @@ public class Evaluation3 {
 	private void permutation_value( ConsCell Cell ) {
 
 		if( Cell.value != null ){
-			int index = this.valiables.lastIndexOf( Cell.value );
+			int index = this.keys.lastIndexOf( Cell.value );
 			if( index != -1 ){
-				Cell.value = this.valiablevalues.get( index );
+				Cell.value = this.vals.get( index );
 			}
 		}
 
