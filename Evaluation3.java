@@ -63,12 +63,12 @@ public class Evaluation3 {
 		}else if( (index = functions.lastIndexOf(operateCell.value)) != -1 ){
 			// 定義された関数
 			ConsCell vCell = operateCell.cdr;
-			ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );
-//			ConsCell tokenCell = functionvalues.get( index );
+			ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );	// ディープコピー
+//			ConsCell tokenCell = functionvalues.get( index );					// 参照
 			int count = 0;
 
 			ConsCell vvCell = tokenCell.car;
-			while( vCell != null ){
+			while( vCell != null && vvCell != null ){
 //				if( vCell.value != null ){
 					valiablevalues.add( returnResult(vCell) );
 					valiables.add( vvCell.value );
@@ -81,9 +81,13 @@ public class Evaluation3 {
 			permutation_value( tokenCell.cdr );
 			String result = returnResult( tokenCell.cdr );
 
+			tokenCell = null;
+
+			int listSize = valiables.size();
 			for(int i = 0; i < count ; i++){
-				valiables.remove( valiables.size() -1 );
-				valiablevalues.remove( valiablevalues.size() -1 );
+				listSize--;
+				valiables.remove( listSize );
+				valiablevalues.remove( listSize );
 			}
 
 			return result;
