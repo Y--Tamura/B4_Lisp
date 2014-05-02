@@ -37,9 +37,16 @@ public class B4_Lisp {
 				// ファイルから入力
 				flag = 1;
 				int i = 0;
-				lispFileOpener lispf = new lispFileOpener( paths );
-				lisp = lispf.lispReader();
-				lispsize = lisp.length;
+				try{
+					lispFileOpener lispf = new lispFileOpener( paths );
+					lisp = lispf.lispReader();
+					lispsize = lisp.length;
+				}catch(NullPointerException e){
+					lisp = new String[1];
+					lisp[0] = "(file)";
+					lispsize = 1;
+					flag = 0;
+				}
 				while(i<paths.length){
 					System.out.println("Read:" + paths[i]);
 					paths[i] = null;
@@ -67,6 +74,9 @@ public class B4_Lisp {
 					paths = input.readLine().split(" ");
 					System.out.println("");
 					flag = 0;
+					if("(exit)".equals(paths[0])){
+						flag = 3;
+					}
 					break;
 				}
 

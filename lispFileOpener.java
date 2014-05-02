@@ -38,7 +38,6 @@ public class lispFileOpener {
 			}catch(FileNotFoundException e){
 				System.out.println(e);
 			}
-
 			i++;
 		}
 
