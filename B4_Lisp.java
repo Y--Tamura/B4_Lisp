@@ -17,8 +17,13 @@ public class B4_Lisp {
 		ArrayList<ConsCell> functionvalues = new ArrayList<ConsCell>();
 		ArrayList<String> valiables = new ArrayList<String>();
 		ArrayList<String> valiablevalues = new ArrayList<String>();
-		long start = 0;
-		long stop = 0;
+//		long start = 0;
+//		long stop = 0;
+
+		System.out.println("\nWelcome to the Lisp Interpreter.\n");
+		System.out.println("Type \"(exit)\" and press enter to quit.");
+		System.out.println("Type \"(file)\" and press enter to read file(s).\n");
+
 
 		do{
 
@@ -45,15 +50,21 @@ public class B4_Lisp {
 
 			do{
 
-				if("exit".equals(lisp[lispcount])) {
+				if("(exit)".equals(lisp[lispcount])) {
+					// "exit"→終了
+//					long exittime = System.currentTimeMillis();
+//					System.out.print("\nClosing the application...\n");
+//					while( System.currentTimeMillis() - exittime < 1000 ){
+//					}
+					System.out.println("Bye.\n");
 					System.exit(0);
 				}
 
-				if("file".equals(lisp[lispcount])) {
-					System.out.print("filepath? >");
+				if("(file)".equals(lisp[lispcount])) {
+					// "file"→ファイルから入力
+					System.out.print("\nfilepath(s)? >");
 					BufferedReader input = new BufferedReader( (new InputStreamReader( System.in )) );
-					paths = new String[1];
-					paths[0] = input.readLine();
+					paths = input.readLine().split(" ");
 					System.out.println("");
 					flag = 0;
 					break;
@@ -87,11 +98,11 @@ public class B4_Lisp {
 //				System.out.println("");
 
 				// 評価
-				start = System.currentTimeMillis();
+//				start = System.currentTimeMillis();
 				Evaluation3 result = new Evaluation3( syntact, functions , valiables, functionvalues , valiablevalues );
 				System.out.println( result.returnResult( syntact ));
-				stop = System.currentTimeMillis();
-				System.out.println("\ttime: " + (stop-start) + "[ms]\n" );
+//				stop = System.currentTimeMillis();
+//				System.out.println("\ttime: " + (stop-start) + "[ms]\n" );
 
 				if( flag == 1 ) lispcount++;
 

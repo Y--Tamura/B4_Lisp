@@ -110,12 +110,12 @@ public class Evaluation3 {
 			// 変数定義
 			this.valiables.add( operateCell.cdr.value );
 			this.valiablevalues.add( operateCell.cdr.cdr.value );
-			return "set " + operateCell.value;
+			return "" + operateCell.cdr.cdr.value;
 		}else if( "defun".equals( operateCell.value ) ){
 			// 関数定義
 			this.functions.add( operateCell.cdr.value );
 			this.functionvalues.add( operateCell.cdr.cdr );
-			return "defun " + operateCell.cdr.value;
+			return "" + operateCell.cdr.value;
 		}else{
 			return cell.value;
 		}

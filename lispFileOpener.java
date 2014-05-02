@@ -85,6 +85,8 @@ public class lispFileOpener {
 			lisp[i] = tokens.removeFirst();
 		}
 
+		tokens = null;
+		this.lispFiles = null;
 		return lisp;
 	}
 
