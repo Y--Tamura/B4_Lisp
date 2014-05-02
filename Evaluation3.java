@@ -1,5 +1,6 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Stack;
+import java.util.Deque;
 
 
 public class Evaluation3 {
@@ -8,7 +9,8 @@ public class Evaluation3 {
 	public ConsCell fixMeCell;
 	public ArrayList<String> functions, valiables, valiablevalues;
 	public ArrayList<ConsCell> functionvalues;
-	private ArrayList<String> keys, vals;
+//	private ArrayList<String> keys, vals;
+//	private int counter = 0;
 //	public Deque<Integer> indexs = new ArrayDeque<Integer>();
 
 
@@ -17,15 +19,15 @@ public class Evaluation3 {
 	}
 
 	public Evaluation3(ConsCell cell, ArrayList<String> functions, ArrayList<String> valiables, ArrayList<ConsCell> functionvalues, ArrayList<String> valiablevalues ) {
-		ArrayList<String> k = new ArrayList<String>();
-		ArrayList<String> v = new ArrayList<String>();
+//		ArrayList<String> k = new ArrayList<String>();
+//		ArrayList<String> v = new ArrayList<String>();
 		fixMeCell = cell;
 		this.functions = functions;
 		this.valiables = valiables;
 		this.functionvalues = functionvalues;
 		this.valiablevalues = valiablevalues;
-		this.keys = k;
-		this.vals = v;
+//		this.keys = k;
+//		this.vals = v;
 	}
 
 	public String returnResult( ConsCell cell){
@@ -37,12 +39,73 @@ public class Evaluation3 {
 			return returnResult(cell.car);
 		}else if( operateCell.value == null ){
 			return "nil";
-		}else if( operateCell.value.matches("[+-/*]") ){
+		}else if( "+-*/".indexOf(operateCell.value) != -1 ){
 			// 四則演算
 			return operate( operateCell.value , operateCell.cdr );
-		}else if( operateCell.value.matches("<|<=|>|>=|=")){
+		}else if( "<=>=".indexOf(operateCell.value) != -1 ){
 			// 比較演算
 			return compare( operateCell.value , operateCell.cdr );
+		}else if( "if".equals( operateCell.value ) ){
+			// if文
+			String bool = returnResult(operateCell.cdr);
+			if( "t".equals( bool )) return returnResult( operateCell.cdr.cdr );
+			else if( "nil".equals( bool )) return returnResult ( operateCell.cdr.cdr.cdr );
+			else{
+				System.out.println("if文の記法が間違っているか、予期しないエラー。");
+				return "error";
+			}
+		}else if( (index = functions.lastIndexOf(operateCell.value)) != -1 ){
+			// 定義された関数
+			ConsCell vCell = operateCell.cdr;
+			ConsCell tokenCell = functionvalues.get( index );
+
+
+			//ディープコピー
+			ArrayList<String> keys = new ArrayList<String>();
+			ArrayList<String> vals = new ArrayList<String>();
+			ConsCell vvCell = tokenCell.car;
+			while( vvCell != null && vvCell.value != null ){
+				vals.add( returnResult(vCell) );
+				keys.add( vvCell.value );
+				vCell = vCell.cdr;
+				vvCell = vvCell.cdr;
+			}
+
+
+			tokenCell = ConsCell.CCf( functionvalues.get( index ), keys, vals );
+
+			String result = returnResult( tokenCell.cdr );
+
+			keys.clear();
+			vals.clear();
+			tokenCell = null;
+
+			// 参照
+//			int count = 0;
+//			ConsCell vvCell = tokenCell.car;
+//
+//			while( vCell != null && vvCell != null ){
+//				this.valiablevalues.add( returnResult(vCell) );
+//				this.valiables.add( vvCell.value );
+//				count++;
+//				vCell = vCell.cdr;
+//				vvCell = vvCell.cdr;
+//			}
+//
+//			String result = returnResult( tokenCell.cdr );
+//
+//			int size = this.valiables.size();
+//			for(int i = 0; i < count; i++){
+//				size--;
+//				this.valiablevalues.remove( size );
+//				this.valiables.remove( size );
+//			}
+
+			return result;
+
+		}else if( (index = valiables.lastIndexOf(operateCell.value)) != -1 ){
+			// 定義された変数
+			return valiablevalues.get(index);
 		}else if( "setq".equals(operateCell.value) ){
 			// 変数定義
 			this.valiables.add( operateCell.cdr.value );
@@ -53,45 +116,6 @@ public class Evaluation3 {
 			this.functions.add( operateCell.cdr.value );
 			this.functionvalues.add( operateCell.cdr.cdr );
 			return "defun " + operateCell.cdr.value;
-		}else if( "if".equals( operateCell.value ) ){
-			// if文
-			String bool = returnResult(operateCell.cdr);
-			if( "t".equals( bool )) return returnResult( operateCell.cdr.cdr );
-			else if( "nil".equals( bool )) return returnResult ( operateCell.cdr.cdr.cdr );
-			else{
-				System.out.println("if文の記法が間違っているか、予期しないエラー。");
-				return "error";
-			}
-		}else if( (index = valiables.lastIndexOf(operateCell.value)) != -1 ){
-			// 定義された変数
-			return valiablevalues.get(index);
-		}else if( (index = functions.lastIndexOf(operateCell.value)) != -1 ){
-			// 定義された関数
-			ConsCell vCell = operateCell.cdr;
-//			ConsCell tokenCell = ConsCell.CC( functionvalues.get( index ) );	// ディープコピー
-			ConsCell tokenCell = functionvalues.get( index );					// 参照
-
-			ConsCell vvCell = tokenCell.car;
-			while( vCell != null && vvCell != null ){
-//				if( vCell.value != null ){
-					this.vals.add( returnResult(vCell) );
-					this.keys.add( vvCell.value );
-					vCell = vCell.cdr;
-					vvCell = vvCell.cdr;
-//				}else break;
-			}
-
-			tokenCell = ConsCell.CCf( functionvalues.get( index ), this.keys, this.vals );
-
-//			permutation_value( tokenCell.cdr );
-			this.keys.clear();
-			this.vals.clear();
-			String result = returnResult( tokenCell.cdr );
-
-			tokenCell = null;
-
-			return result;
-
 		}else{
 			return cell.value;
 		}
@@ -99,112 +123,78 @@ public class Evaluation3 {
 	}
 
 
-	private void permutation_value( ConsCell Cell ) {
-
-		if( Cell.value != null ){
-			int index = this.keys.lastIndexOf( Cell.value );
-			if( index != -1 ){
-				Cell.value = this.vals.get( index );
-			}
-		}
-
-		if( Cell.car != null ) permutation_value( Cell.car );
-		if( Cell.cdr != null ) permutation_value( Cell.cdr );
-
-	}
+//	private void permutation_value( ConsCell Cell ) {
+//
+//		if( Cell.value != null ){
+//			int index = this.valiables.lastIndexOf( Cell.value );
+//			if( index != -1 ){
+//				Cell.value = this.valiablevalues.get( index );
+//			}
+//		}
+//
+//		if( Cell.car != null ) permutation_value( Cell.car );
+//		if( Cell.cdr != null ) permutation_value( Cell.cdr );
+//
+//	}
 
 	// 四則演算
 	private String operate(String operator, ConsCell operateCC) {
 
+		Deque<Double> values = new ArrayDeque<Double>();
 		ConsCell temp = operateCC;
-		Stack<Double> values = new Stack<Double>();
 		double value = 0.0;
 
 		while( temp != null ){
 			try{
 				value = Double.valueOf( returnResult(temp) );
-				values.push(value);
+				values.addLast(value);
 				temp = temp.cdr;
 			}catch(NumberFormatException e){
 				break;
 			}
 		}
 
-		if( values.empty() ){
-			System.out.println("記法が間違っているか、予期しないエラー。(stack_empty)");
+		if( values.size() == 0 ){
+			System.out.println("記法が間違っているか、予期しないエラー。(queue_empty)");
 			return "error";
 		}
 
-		double num = 0.0 ;
+		double num = values.removeFirst();
 		int size = values.size();
 
 		if( "+".equals(operator) ) {
-			num = 0.0;
 			for( int i = 0; i < size; i++ ){
-				num += values.pop();
+				num += values.removeFirst();
 			}
 		} else if( "*".equals(operator) ){
-			num = 1.0;
 			for( int i = 0; i < size; i++ ){
-				num *= values.pop();
+				num *= values.removeFirst();
 			}
 		} else if( "-".equals(operator) ){
-			if( size != 2 ){
-				System.out.println("減算は２項演算です");
-				return "error";
-			} else {
-				double n = values.pop();
-				double m = values.pop();
-				num = m - n;
+			for( int i = 0; i < size; i++ ){
+				num -= values.removeFirst();
 			}
 		} else if( "/".equals(operator) ){
-			if( size != 2 ){
-				System.out.println("除算は２項演算です");
-				return "error";
-			} else {
-				double n = values.pop();
-				double m = values.pop();
-				num = m / n;
+			for( int i = 0; i < size; i++ ){
+				num /= values.removeFirst();
 			}
 		} else {
 				System.out.println("記法が間違っているか、予期しないエラー。");
 				return "error";
 		}
 
-	values.clear();
-	return String.valueOf(num);
+		values.clear();
+		return String.valueOf(num);
 
 	}
 
 
 	// 比較演算
 	private String compare(String operater, ConsCell operateCC) {
-
-		ConsCell temp = operateCC;
-		Stack<Double> values = new Stack<Double>();
-		double dValue = 0.0;
-
-		while( temp != null ){
-			try{
-				dValue = Double.valueOf( returnResult(temp) );
-				values.push(dValue);
-				temp = temp.cdr;
-			}catch(NumberFormatException e){
-				break;
-			}
-		}
-
-		String value ;
-		int size = values.size();
-
-		if( values.empty() || size != 2 ){
-			System.out.println("比較は２項演算です。");
-			return "error";
-		}
-
-		double n = values.pop();
-		double m = values.pop();
-
+//		System.out.println("m=" + returnResult(operateCC) + " n=" + returnResult(operateCC.cdr));
+		double m = Double.valueOf( returnResult(operateCC) );
+		double n = Double.valueOf( returnResult(operateCC.cdr) );
+		String value = null;
 		if( "<".equals(operater) ){
 			if( m < n ) value = "t";
 			else value = "nil";
@@ -224,8 +214,6 @@ public class Evaluation3 {
 			System.out.println("比較の記述が不正");
 			return "error";
 		}
-
-		values.clear();
 		return value;
 	}
 

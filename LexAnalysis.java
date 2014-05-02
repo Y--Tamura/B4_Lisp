@@ -20,7 +20,7 @@ public class LexAnalysis {
 		int i;												// カウンタ
 
 		//スペースで分割してから、くっついているトークンを考慮
-		temps_str = this.token.split(" ");					//スペースで分割
+		temps_str = this.token.split(" |\t");			//分割
 
 		//分割後に改めてくっついているトークンを考慮
 		for( i=0; i<temps_str.length; i++ ){
