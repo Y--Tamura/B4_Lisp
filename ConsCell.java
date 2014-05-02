@@ -82,7 +82,7 @@ public class ConsCell {
 			counter++;
 			if( !")".equals( str[ counter ]) ){
 				this.cdr = new ConsCell( str , counter , functions , valiables , functionvalues , valiablevalues );
-			}
+			}else this.cdr = null;
 		}
 
 	}

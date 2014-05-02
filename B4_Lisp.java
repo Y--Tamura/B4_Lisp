@@ -8,6 +8,7 @@ public class B4_Lisp {
 	public static void main(String[] args) throws IOException {
 
 		String[] lisp;
+		String[] paths = args;
 		int flag = 0;
 		int lispcount = 0;
 		int lispsize = 1;
@@ -21,31 +22,41 @@ public class B4_Lisp {
 
 		do{
 
-			if( flag == 3 || args.length == 0 ){
+			if( flag == 3 || paths.length == 0 ){
 				// 直接入力
 				System.out.print(">");
 				BufferedReader input = new BufferedReader( (new InputStreamReader( System.in )) );
 				lisp = new String[lispsize];
 				lisp[lispcount] = input.readLine();
-			} else if( args.length == 1 ) {
+			} else {
 				// ファイルから入力
 				flag = 1;
-				lispFileOpener lispf = new lispFileOpener( args[0] );
+				int i = 0;
+				lispFileOpener lispf = new lispFileOpener( paths );
 				lisp = lispf.lispReader();
 				lispsize = lisp.length;
-				System.out.println("Read:" + args[0]);
-				args[0] = null;
-			} else {
-				lisp = null;
-				System.out.println("Error: 読み込めるファイルは１つです。");
-				System.exit(0);
+				while(i<paths.length){
+					System.out.println("Read:" + paths[i]);
+					paths[i] = null;
+					i++;
+				}
+				System.out.println("");
 			}
-
 
 			do{
 
 				if("exit".equals(lisp[lispcount])) {
 					System.exit(0);
+				}
+
+				if("file".equals(lisp[lispcount])) {
+					System.out.print("filepath? >");
+					BufferedReader input = new BufferedReader( (new InputStreamReader( System.in )) );
+					paths = new String[1];
+					paths[0] = input.readLine();
+					System.out.println("");
+					flag = 0;
+					break;
 				}
 
 				if( flag == 1 ){
