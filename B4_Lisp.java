@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class B4_Lisp {
@@ -17,6 +18,7 @@ public class B4_Lisp {
 		ArrayList<ConsCell> functionvalues = new ArrayList<ConsCell>();
 		ArrayList<String> valiables = new ArrayList<String>();
 		ArrayList<String> valiablevalues = new ArrayList<String>();
+		DecimalFormat df = new DecimalFormat("########0.#########;-########0.#########");
 //		long start = 0;
 //		long stop = 0;
 
@@ -110,7 +112,13 @@ public class B4_Lisp {
 				// 評価
 //				start = System.currentTimeMillis();
 				Evaluation3 result = new Evaluation3( syntact, functions , valiables, functionvalues , valiablevalues );
-				System.out.println( result.returnResult( syntact ));
+				String answer = result.returnResult( syntact );
+				try{
+					double d = Double.parseDouble( answer );
+					System.out.println( df.format(d) + "\n");
+				} catch(NumberFormatException e){
+					System.out.println( answer+ "\n");;
+				}
 //				stop = System.currentTimeMillis();
 //				System.out.println("\ttime: " + (stop-start) + "[ms]\n" );
 
