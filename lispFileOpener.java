@@ -63,7 +63,7 @@ public class lispFileOpener {
 						temp += ch;
 
 						if(bracketCount == 0){
-							tokens.addLast(temp);
+							if(!temp.matches("^ +$")) tokens.addLast(temp);
 							temp = "";
 						}
 					}
