@@ -127,9 +127,10 @@ public class B4_Lisp {
 			}while( lispcount < lispsize && flag == 1);
 
 			if( flag == 1 ){
-				flag = 3;
-				lispsize = 1;
-				lispcount = 0;
+				System.exit(0);
+//				flag = 3;
+//				lispsize = 1;
+//				lispcount = 0;
 			}
 
 		} while ( true );
